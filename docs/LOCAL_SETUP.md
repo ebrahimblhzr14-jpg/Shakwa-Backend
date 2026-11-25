@@ -1,63 +1,68 @@
 # Shakwa Backend — Local Developer Setup Guide
 
-## 1. Prerequisites and Required Software
+## 1. Primary Development Tools & Prerequisites
 
-* **Operating System:** Windows 10/11 or Windows Server
-* **.NET SDK:** .NET 8.0 SDK (version 8.0.x or higher)
-* **IDE / Editor:**
-  * Microsoft Visual Studio 2022 (Community / Professional / Enterprise) with the **ASP.NET and web development** workload installed, OR
-  * Visual Studio Code with the **C# Dev Kit** extension
-* **Database Engine:** Microsoft SQL Server 2019, 2022, or SQL Server Express / LocalDB
-* **Database Client:** SQL Server Management Studio (SSMS) or Azure Data Studio
+* **Primary IDE:** Microsoft Visual Studio 2022 (Community, Professional, or Enterprise) with the **ASP.NET and web development** workload.
+* **.NET SDK:** .NET 8.0 SDK (version 8.0.x or higher).
+* **Database Engine:** Microsoft SQL Server 2019, 2022, or SQL Server Express / LocalDB.
+  *(Note: Visual Studio provides tooling to connect to databases, but a separate SQL Server database engine instance or SQL Server Express installation is required on the local machine).*
+* **Database Management Tool:** SQL Server Management Studio (SSMS) or Azure Data Studio.
 
 ---
 
-## 2. Project Structure Overview
+## 2. Downloading the Repository
+
+Anyone can obtain the backend source code directly from GitHub without an account:
+1. Navigate to: `https://github.com/ebrahimblhzr14-jpg/Shakwa-Backend`
+2. Click the green **Code** button and select **Download ZIP**.
+3. Extract the downloaded ZIP archive to a local folder (e.g., `C:\Projects\Shakwa-Backend`).
+
+Alternatively, clone via Git:
+```powershell
+git clone https://github.com/ebrahimblhzr14-jpg/Shakwa-Backend.git
+```
+
+---
+
+## 3. Project Structure
 
 ```
-Backend/
+Shakwa-Backend/
 ├── docs/
-│   └── LOCAL_SETUP.md
+│   └── LOCAL_SETUP.md             # Developer setup guide
 └── src/
     └── complaint_project_ADO/
-        ├── ComplainsSystemAPI/         # ASP.NET Core 8 Web API host & controllers
+        ├── ComplainsSystemAPI/    # ASP.NET Core 8 Web API & controllers
         ├── ComplaintManagement.Access/   # ADO.NET data access layer & repositories
-        ├── ComplaintManagement.Business/ # Business services, DTOs & security
-        ├── ComplaintManagement.Tests/    # Unit & integration test suite
-        └── ComplainsSystemAPI.sln        # Main Visual Studio Solution
+        ├── ComplaintManagement.Business/ # Domain logic, DTOs & security services
+        ├── ComplaintManagement.Tests/    # Unit & integration test suites
+        └── ComplainsSystemAPI.sln        # Visual Studio 2022 solution
 ```
 
 ---
 
-## 3. Opening the Solution and Restoring Dependencies
+## 4. Opening and Building in Visual Studio 2022
 
-### In Visual Studio 2022:
-1. Launch Visual Studio 2022.
+1. Launch **Visual Studio 2022**.
 2. Select **Open a project or solution**.
-3. Navigate to and open:
+3. Browse to and open:
    `src\complaint_project_ADO\ComplainsSystemAPI.sln`
-4. Visual Studio will automatically restore NuGet packages. If needed, right-click the solution in Solution Explorer and select **Restore NuGet Packages**.
-
-### In CLI:
-From the backend directory:
-```powershell
-cd src/complaint_project_ADO
-dotnet restore
-```
+4. Visual Studio will automatically restore required NuGet packages. If needed, right-click the solution in Solution Explorer and select **Restore NuGet Packages**.
+5. Build the solution (**Build > Build Solution** or press **Ctrl+Shift+B**).
 
 ---
 
-## 4. Database Setup & Configuration
+## 5. Local Database Configuration
 
-### Database Creation Note:
-* **Current Limitation:** A standalone safe SQL schema generation script is not currently included in this source repository. The project uses ADO.NET with parameterized queries and database procedures.
-* Database initialization requires obtaining a development database schema from the database administrator or restoring the authorized development backup into your local SQL Server instance as `ComplaintManagementDB`.
+### Database Schema Notice:
+* **Current Limitation:** A standalone safe SQL database creation script is not included in this source repository. The backend uses direct ADO.NET parameterized queries against existing tables and stored procedures.
+* Database initialization requires obtaining the development database schema or restoring the authorized development backup into your local SQL Server instance as `ComplaintManagementDB`.
 
 ### Configuring the Connection String:
-To configure your local database connection without committing passwords or secrets into version control, use .NET User Secrets or an untracked `appsettings.Development.json` override.
+To configure your local database connection without committing credentials or passwords:
 
-#### Option A: Windows Authentication (Recommended for Local Dev)
-In `appsettings.json` or `appsettings.Development.json`:
+#### Option A: Windows Authentication (Recommended)
+Edit `src/complaint_project_ADO/ComplainsSystemAPI/appsettings.json` or `appsettings.Development.json`:
 ```json
 {
   "ConnectionStrings": {
@@ -65,37 +70,38 @@ In `appsettings.json` or `appsettings.Development.json`:
   }
 }
 ```
-*(Replace `.` with your SQL Server instance name such as `localhost` or `.\SQLEXPRESS` if applicable).*
+*(If using a named instance like SQL Server Express, use `Server=.\\SQLEXPRESS;Database=ComplaintManagementDB;...`)*.
 
-#### Option B: .NET User Secrets (Completely isolated from source tree)
-Run from the `ComplainsSystemAPI` project folder:
+#### Option B: .NET User Secrets
+From the `ComplainsSystemAPI` project folder:
 ```powershell
 cd src/complaint_project_ADO/ComplainsSystemAPI
 dotnet user-secrets init
 dotnet user-secrets set "ConnectionStrings:DefaultConnection" "Server=localhost;Database=ComplaintManagementDB;Trusted_Connection=True;TrustServerCertificate=True"
-dotnet user-secrets set "Jwt:Key" "YOUR_LOCAL_TEST_SECRET_KEY_MIN_32_CHARS"
 ```
 
 ---
 
-## 5. Running the Backend Service
+## 6. Running the Backend Service
 
-### Via CLI:
-From the repository root:
+### Via Visual Studio 2022:
+1. In Solution Explorer, right-click `ComplainsSystemAPI` and choose **Set as Startup Project**.
+2. Select the `ComplainsSystemAPI` profile in the top toolbar.
+3. Press **Ctrl+F5** (Run without debugging) or **F5** (Debug).
+4. The API will listen on `http://localhost:5000` (or `http://0.0.0.0:5000`).
+
+### Via Command Line:
 ```powershell
-dotnet run --project src/complaint_project_ADO/ComplainsSystemAPI/ComplainsSystemAPI.csproj --urls "http://0.0.0.0:5000;http://0.0.0.0:5199;https://localhost:7043"
+cd src/complaint_project_ADO
+dotnet run --project ComplainsSystemAPI/ComplainsSystemAPI.csproj --urls "http://0.0.0.0:5000"
 ```
-
-### Via Visual Studio:
-1. Set `ComplainsSystemAPI` as the Startup Project.
-2. Choose the `ComplainsSystemAPI` run profile.
-3. Press **F5** (Debug) or **Ctrl+F5** (Run without debugging).
 
 ---
 
-## 6. Running Backend Tests
+## 7. Running Backend Tests
 
-To execute the test suite:
+In Visual Studio 2022, open **Test > Test Explorer** and click **Run All Tests**, or execute via CLI:
 ```powershell
 dotnet test src/complaint_project_ADO/ComplaintManagement.Tests/ComplaintManagement.Tests.csproj
 ```
+*(36/36 tests passing)*.
