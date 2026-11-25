@@ -1,0 +1,35 @@
+## Visual Studio & MSBuild
+[Bb]in/
+[Oo]bj/
+[Ll]og/
+[Ll]ogs/
+.vs/
+*.user
+*.userosscache
+*.suo
+*.userprefs
+*.sln.docstates
+
+## Database & Backups
+*.bak
+*.mdf
+*.ldf
+pre_fix_backup/
+*.zip
+*.7z
+*.rar
+
+## Secrets & Local Config
+appsettings.Production.json
+*.local.json
+.env
+.env.*
+
+## Documentation restrictions
+[Rr][Ee][Aa][Dd][Mm][Ee]*
+
+## OS & IDE
+.DS_Store
+Thumbs.db
+.idea/
+.vscode/
